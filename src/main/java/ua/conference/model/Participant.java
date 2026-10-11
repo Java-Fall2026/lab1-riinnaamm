@@ -1,7 +1,7 @@
 package ua.conference.model;
 
 import ua.common.BaseEntity;
-import ua.conference.util.ValidationHelper;
+import ua.conference.util.ConferenceUtils;
 import java.util.Objects;
 
 public class Participant extends BaseEntity {
@@ -22,21 +22,20 @@ public class Participant extends BaseEntity {
 
     public String getEmail() { return email; }
     public void setEmail(String email) {
-        ValidationHelper.requireNonNullOrEmpty(email, "Email");
-        ValidationHelper.requireLowerCase(email, "Email");
-        this.email = email;
+        ConferenceUtils.validateNonNullOrEmpty(email, "Email");
+        this.email = ConferenceUtils.normalizeEmail(email);
     }
 
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) {
-        ValidationHelper.requireNonNullOrEmpty(fullName, "FullName");
-        this.fullName = fullName;
+        ConferenceUtils.validateNonNullOrEmpty(fullName, "FullName");
+        this.fullName = ConferenceUtils.normalizeString(fullName);
     }
 
     public String getOrganization() { return organization; }
     public void setOrganization(String organization) {
-        ValidationHelper.requireNonNullOrEmpty(organization, "Organization");
-        this.organization = organization;
+        ConferenceUtils.validateNonNullOrEmpty(organization, "Organization");
+        this.organization = ConferenceUtils.normalizeString(organization);
     }
 
     @Override
@@ -54,6 +53,11 @@ public class Participant extends BaseEntity {
 
     @Override
     public String toString() {
-        return "Participant{" + "email='" + email + '\'' + ", fullName='" + fullName + '\'' + '}';
+        return "Participant{" +
+                "email='" + email + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", organization='" + organization + '\'' +
+                ", createdAt=" + createdAt +
+                '}';
     }
 }

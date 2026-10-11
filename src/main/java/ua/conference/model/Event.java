@@ -1,7 +1,7 @@
 package ua.conference.model;
 
 import ua.common.BaseEntity;
-import ua.conference.util.ValidationHelper;
+import ua.conference.util.ConferenceUtils;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -15,21 +15,23 @@ public class Event extends BaseEntity {
 
     public Event(String eventCode, String title, Venue venue, String category, LocalDate startDate, LocalDate endDate) {
         super();
-        ValidationHelper.requireNonNullOrEmpty(eventCode, "EventCode");
-        ValidationHelper.requireNonNullOrEmpty(title, "Title");
-        ValidationHelper.requireNonNull(venue, "Venue");
-        ValidationHelper.requireNonNullOrEmpty(category, "Category");
-        ValidationHelper.requireNonNull(startDate, "StartDate");
-        ValidationHelper.requireNonNull(endDate, "EndDate");
+        ConferenceUtils.validateNonNullOrEmpty(eventCode, "EventCode");
+        ConferenceUtils.validateNonNullOrEmpty(title, "Title");
+        ConferenceUtils.validateNonNull(venue, "Venue");
+        ConferenceUtils.validateNonNull(startDate, "StartDate");
+        ConferenceUtils.validateNonNull(endDate, "EndDate");
+
+        String normalizedCategory = ConferenceUtils.normalizeEnumString(category);
+        ConferenceUtils.validateCategory(normalizedCategory);
 
         if (endDate.isBefore(startDate)) {
             throw new IllegalArgumentException("EndDate expected >= StartDate, but got: " + endDate + " < " + startDate);
         }
 
-        this.eventCode = eventCode;
-        this.title = title;
+        this.eventCode = ConferenceUtils.normalizeString(eventCode);
+        this.title = ConferenceUtils.normalizeString(title);
         this.venue = venue;
-        this.category = category;
+        this.category = normalizedCategory;
         this.startDate = startDate;
         this.endDate = endDate;
     }
@@ -56,6 +58,14 @@ public class Event extends BaseEntity {
 
     @Override
     public String toString() {
-        return "Event{" + "eventCode='" + eventCode + '\'' + ", title='" + title + '\'' + '}';
+        return "Event{" +
+                "eventCode='" + eventCode + '\'' +
+                ", title='" + title + '\'' +
+                ", venue=" + venue +
+                ", category='" + category + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", createdAt=" + createdAt +
+                '}';
     }
 }

@@ -6,61 +6,63 @@ import java.time.LocalDate;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("=== Успішний сценарій ===");
-        try {
-            Participant p = Participant.of("john@example.com", "John Doe", "TechCorp");
-            Venue v = Venue.of("HALL-A", "Main Hall", 500);
-            Event e = new Event("E001", "Java Conf 2026", v, "TECH",
-                    LocalDate.of(2026, 10, 10), LocalDate.of(2026, 10, 12));
-            EventRegistration reg = new EventRegistration(e, p, "VIP", LocalDate.of(2026, 10, 1));
+        System.out.println("=== 1. Створення об'єктів конструктором та фабричним методом ===");
+        Venue venue1 = Venue.of("  HALL-A ", " Main Hall ", 500);
+        Participant participant1 = Participant.of(" User1@Mail.COM ", " Ivan Franko ", " LNU ");
+        Event event1 = new Event("CONF-2026", "Java Conference", venue1, " tech ", LocalDate.of(2026, 10, 15), LocalDate.of(2026, 10, 17));
+        EventRegistration reg1 = new EventRegistration(event1, participant1, " vip ", LocalDate.of(2026, 10, 10));
 
-            System.out.println("Сутності успішно створено:");
-            System.out.println(p);
-            System.out.println(v);
-            System.out.println(e);
-            System.out.println(reg);
+        System.out.println("=== 2. Демонстрація нормалізації ===");
+        System.out.println("Email (вхід: ' User1@Mail.COM '): " + participant1.getEmail());
+        System.out.println("Category (вхід: ' tech '): " + event1.getCategory());
+        System.out.println("TicketType (вхід: ' vip '): " + reg1.getTicketType());
 
-            System.out.println("\nОбчислювані методи:");
-            System.out.println("Тривалість події (днів): " + ConferenceUtils.eventDays(e));
-            System.out.println("Зареєструвалися за (днів до початку): " + ConferenceUtils.daysBeforeEvent(reg));
-        } catch (Exception ex) {
-            System.out.println("Помилка: " + ex.getMessage());
-        }
-
-        System.out.println("\n=== Невдалий сценарій ===");
-
-        // 1. Некоректний Email (не в нижньому регістрі)
-        try {
-            Participant.of("INVALID_EMAIL@Test.com", "Jane Doe", "Org");
-        } catch (IllegalArgumentException ex) {
-            System.out.println("Виловлено помилку [Email]: " + ex.getMessage());
-        }
-
-        // 2. Capacity <= 0
+        System.out.println("\n=== 3. Порушення правил валідації (try/catch) ===");
         try {
             Venue.of("HALL-B", "Small Room", -5);
-        } catch (IllegalArgumentException ex) {
-            System.out.println("Виловлено помилку [Capacity]: " + ex.getMessage());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Помилка 1: " + e.getMessage());
         }
 
-        // 3. EndDate < StartDate
         try {
-            Venue v = Venue.of("HALL-A", "Main Hall", 500);
-            new Event("E002", "Bad Event", v, "TECH",
-                    LocalDate.of(2026, 10, 12), LocalDate.of(2026, 10, 10));
-        } catch (IllegalArgumentException ex) {
-            System.out.println("Виловлено помилку [Event Dates]: " + ex.getMessage());
+            new Event("CONF-ERR", "Invalid Category", venue1, "pizza", LocalDate.now(), LocalDate.now().plusDays(1));
+        } catch (IllegalArgumentException e) {
+            System.out.println("Помилка 2: " + e.getMessage());
         }
 
-        // 4. Реєстрація після початку події
         try {
-            Participant p = Participant.of("kate@example.com", "Kate", "Org");
-            Venue v = Venue.of("HALL-A", "Main Hall", 500);
-            Event e = new Event("E001", "Java Conf", v, "TECH",
-                    LocalDate.of(2026, 10, 10), LocalDate.of(2026, 10, 12));
-            new EventRegistration(e, p, "STANDARD", LocalDate.of(2026, 10, 15));
-        } catch (IllegalArgumentException ex) {
-            System.out.println("Виловлено помилку [Registration Date]: " + ex.getMessage());
+            new EventRegistration(event1, participant1, "STANDARD", LocalDate.of(2026, 10, 20));
+        } catch (IllegalArgumentException e) {
+            System.out.println("Помилка 3: " + e.getMessage());
         }
+
+        System.out.println("\n=== 4. Спроба зіпсувати об'єкт сеттером ===");
+        try {
+            venue1.setCapacity(0);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Сеттер відхилив некоректне значення: " + e.getMessage());
+        }
+
+        System.out.println("\n=== 5. Порівняння ==/equals/hashCode для однакових і різних об'єктів ===");
+        Participant participant2 = Participant.of("user1@mail.com", "Ivan Franko (копія)", "Inша Організація");
+        Participant participant3 = Participant.of("other@mail.com", "Petro Mohyla", "NaUKMA");
+
+        System.out.println("participant1 == participant2: " + (participant1 == participant2));
+        System.out.println("participant1.equals(participant2): " + participant1.equals(participant2));
+        System.out.println("hashCode однакові: " + (participant1.hashCode() == participant2.hashCode()));
+        System.out.println("participant1.equals(participant3): " + participant1.equals(participant3));
+
+        System.out.println("\n=== 6. Виклик обчислюваних методів ===");
+        System.out.println("Тривалість події (eventDays): " + ConferenceUtils.eventDays(event1) + " дн.");
+        System.out.println("Днів до початку реєстрації (daysBeforeEvent): " + ConferenceUtils.daysBeforeEvent(reg1) + " дн.");
+
+        System.out.println("\n=== 7. Вивід усіх сутностей через toString() ===");
+        System.out.println(venue1);
+        System.out.println(participant1);
+        System.out.println(event1);
+        System.out.println(reg1);
+
+        // System.out.println(ua.conference.util.ValidationHelper.class.getName());
+        // Рядок вище не скомпілюється, оскільки ValidationHelper є package-private класом у пакеті ua.conference.util і недоступний ззовні.
     }
 }

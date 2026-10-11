@@ -1,7 +1,7 @@
 package ua.conference.model;
 
 import ua.common.BaseEntity;
-import ua.conference.util.ValidationHelper;
+import ua.conference.util.ConferenceUtils;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -13,10 +13,12 @@ public class EventRegistration extends BaseEntity {
 
     public EventRegistration(Event event, Participant participant, String ticketType, LocalDate registrationDate) {
         super();
-        ValidationHelper.requireNonNull(event, "Event");
-        ValidationHelper.requireNonNull(participant, "Participant");
-        ValidationHelper.requireNonNullOrEmpty(ticketType, "TicketType");
-        ValidationHelper.requireNonNull(registrationDate, "RegistrationDate");
+        ConferenceUtils.validateNonNull(event, "Event");
+        ConferenceUtils.validateNonNull(participant, "Participant");
+        ConferenceUtils.validateNonNull(registrationDate, "RegistrationDate");
+
+        String normalizedTicketType = ConferenceUtils.normalizeEnumString(ticketType);
+        ConferenceUtils.validateTicketType(normalizedTicketType);
 
         if (registrationDate.isAfter(event.getStartDate())) {
             throw new IllegalArgumentException("RegistrationDate expected <= StartDate (" + event.getStartDate() + "), but got: " + registrationDate);
@@ -24,7 +26,7 @@ public class EventRegistration extends BaseEntity {
 
         this.event = event;
         this.participant = participant;
-        this.ticketType = ticketType;
+        this.ticketType = normalizedTicketType;
         this.registrationDate = registrationDate;
     }
 
@@ -48,6 +50,12 @@ public class EventRegistration extends BaseEntity {
 
     @Override
     public String toString() {
-        return "EventRegistration{" + "ticketType='" + ticketType + '\'' + ", registrationDate=" + registrationDate + '}';
+        return "EventRegistration{" +
+                "event=" + event +
+                ", participant=" + participant +
+                ", ticketType='" + ticketType + '\'' +
+                ", registrationDate=" + registrationDate +
+                ", createdAt=" + createdAt +
+                '}';
     }
 }
