@@ -1,16 +1,14 @@
 package ua.conference.model;
 
-import ua.common.BaseEntity;
 import ua.conference.util.ConferenceUtils;
 import java.util.Objects;
 
-public class Venue extends BaseEntity {
+public class Venue {
     private String venueCode;
     private String name;
     private int capacity;
 
     private Venue(String venueCode, String name, int capacity) {
-        super();
         setVenueCode(venueCode);
         setName(name);
         setCapacity(capacity);
@@ -57,7 +55,6 @@ public class Venue extends BaseEntity {
                 "venueCode='" + venueCode + '\'' +
                 ", name='" + name + '\'' +
                 ", capacity=" + capacity +
-                ", createdAt=" + createdAt +
                 '}';
     }
 }

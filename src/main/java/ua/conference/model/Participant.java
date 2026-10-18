@@ -1,16 +1,14 @@
 package ua.conference.model;
 
-import ua.common.BaseEntity;
 import ua.conference.util.ConferenceUtils;
 import java.util.Objects;
 
-public class Participant extends BaseEntity {
+public class Participant {
     private String email;
     private String fullName;
     private String organization;
 
     private Participant(String email, String fullName, String organization) {
-        super();
         setEmail(email);
         setFullName(fullName);
         setOrganization(organization);
@@ -57,7 +55,6 @@ public class Participant extends BaseEntity {
                 "email='" + email + '\'' +
                 ", fullName='" + fullName + '\'' +
                 ", organization='" + organization + '\'' +
-                ", createdAt=" + createdAt +
                 '}';
     }
 }

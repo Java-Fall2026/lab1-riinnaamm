@@ -1,14 +1,12 @@
 package ua.conference.util;
 
 import ua.conference.model.Event;
+import ua.conference.model.EventCategory;
 import ua.conference.model.EventRegistration;
+import ua.conference.model.TicketType;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 public class ConferenceUtils {
-
-    public static final List<String> ALLOWED_CATEGORIES = List.of("TECH", "SCIENCE", "BUSINESS", "ART");
-    public static final List<String> ALLOWED_TICKET_TYPES = List.of("STANDARD", "VIP", "SPEAKER", "PRESS");
 
     private ConferenceUtils() {
     }
@@ -25,14 +23,6 @@ public class ConferenceUtils {
         ValidationHelper.requirePositive(value, fieldName);
     }
 
-    public static void validateCategory(String category) {
-        ValidationHelper.requireAllowedValue(category, ALLOWED_CATEGORIES, "Category");
-    }
-
-    public static void validateTicketType(String ticketType) {
-        ValidationHelper.requireAllowedValue(ticketType, ALLOWED_TICKET_TYPES, "TicketType");
-    }
-
     public static String normalizeString(String value) {
         return FormatHelper.normalize(value);
     }
@@ -41,17 +31,37 @@ public class ConferenceUtils {
         return FormatHelper.normalizeToLowerCase(email);
     }
 
-    public static String normalizeEnumString(String value) {
-        return FormatHelper.normalizeToUpperCase(value);
-    }
-
     public static long eventDays(Event event) {
         ValidationHelper.requireNonNull(event, "Event");
-        return ChronoUnit.DAYS.between(event.getStartDate(), event.getEndDate()) + 1;
+        return ChronoUnit.DAYS.between(event.startDate(), event.endDate()) + 1;
     }
 
     public static long daysBeforeEvent(EventRegistration reg) {
         ValidationHelper.requireNonNull(reg, "EventRegistration");
-        return ChronoUnit.DAYS.between(reg.getRegistrationDate(), reg.getEvent().getStartDate());
+        return ChronoUnit.DAYS.between(reg.registrationDate(), reg.event().startDate());
+    }
+
+    public static String getCategoryDescription(EventCategory category) {
+        ValidationHelper.requireNonNull(category, "Category");
+        return switch (category) {
+            case TECH -> "Information technology, programming, and software architecture.";
+            case SCIENCE -> "Academic research, innovations, and scientific publications.";
+            case BUSINESS -> "Entrepreneurship, marketing, management, and startups.";
+            case ART -> "Design, digital creative arts, and media production.";
+        };
+    }
+
+    public static double calculateTicketPrice(TicketType ticketType, double basePrice) {
+        ValidationHelper.requireNonNull(ticketType, "TicketType");
+        ValidationHelper.requirePositive((int) basePrice, "BasePrice");
+
+        double multiplier = switch (ticketType) {
+            case STANDARD -> 1.0;
+            case VIP -> 1.5;
+            case PRESS -> 0.5;
+            case SPEAKER -> 0.0;
+        };
+
+        return basePrice * multiplier;
     }
 }
