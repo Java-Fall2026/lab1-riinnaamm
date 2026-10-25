@@ -1,68 +1,39 @@
 package ua.conference;
 
-import ua.conference.model.*;
-import ua.conference.util.ConferenceUtils;
-import java.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ua.conference.model.Venue;
+import ua.conference.util.VenueLoader;
+
+import java.util.List;
 
 public class Main {
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
+
     public static void main(String[] args) {
-        System.out.println("=== 1. Створення об'єктів конструктором та фабричним методом ===");
-        Venue venue1 = Venue.of("  HALL-A ", " Main Hall ", 500);
-        Participant participant1 = Participant.of(" User1@Mail.COM ", " Ivan Franko ", " LNU ");
-        Event event1 = new Event("CONF-2026", "Java Conference", venue1, " tech ", LocalDate.of(2026, 10, 15), LocalDate.of(2026, 10, 17));
-        EventRegistration reg1 = new EventRegistration(event1, participant1, " vip ", LocalDate.of(2026, 10, 10));
+        System.out.println("=== 1. Читання CSV-файлу (коректні та некоректні рядки) ===");
+        log.info("Starting CSV reading process...");
+        List<Venue> venues = VenueLoader.loadVenues("data/venues.csv");
+        System.out.println("Прочитані коректні об'єкти Venue:");
+        venues.forEach(System.out::println);
 
-        System.out.println("=== 2. Демонстрація нормалізації ===");
-        System.out.println("Email (вхід: ' User1@Mail.COM '): " + participant1.getEmail());
-        System.out.println("Category (вхід: ' tech '): " + event1.getCategory());
-        System.out.println("TicketType (вхід: ' vip '): " + reg1.getTicketType());
+        System.out.println("\n=== 2. Спроба прочитати відсутній файл ===");
+        List<Venue> emptyList = VenueLoader.loadVenues("data/non_existent_file.csv");
+        System.out.println("Кількість прочитаних об'єктів з відсутнього файлу: " + emptyList.size());
 
-        System.out.println("\n=== 3. Порушення правил валідації (try/catch) ===");
+        System.out.println("\n=== 3. Некоректне значення в сеттері змінюваного класу ===");
+        Venue venue = Venue.of("HALL-X", "Testing Room", 100);
         try {
-            Venue.of("HALL-B", "Small Room", -5);
+            System.out.println("Спроба встановити від'ємну місткість (-10)...");
+            venue.setCapacity(-10);
         } catch (IllegalArgumentException e) {
-            System.out.println("Помилка 1: " + e.getMessage());
+            log.error("Caught validation error when calling setter: {}", e.getMessage());
+            System.out.println("Перехоплено виключення сеттера: " + e.getMessage());
         }
 
-        try {
-            new Event("CONF-ERR", "Invalid Category", venue1, "pizza", LocalDate.now(), LocalDate.now().plusDays(1));
-        } catch (IllegalArgumentException e) {
-            System.out.println("Помилка 2: " + e.getMessage());
-        }
-
-        try {
-            new EventRegistration(event1, participant1, "STANDARD", LocalDate.of(2026, 10, 20));
-        } catch (IllegalArgumentException e) {
-            System.out.println("Помилка 3: " + e.getMessage());
-        }
-
-        System.out.println("\n=== 4. Спроба зіпсувати об'єкт сеттером ===");
-        try {
-            venue1.setCapacity(0);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Сеттер відхилив некоректне значення: " + e.getMessage());
-        }
-
-        System.out.println("\n=== 5. Порівняння ==/equals/hashCode для однакових і різних об'єктів ===");
-        Participant participant2 = Participant.of("user1@mail.com", "Ivan Franko (копія)", "Inша Організація");
-        Participant participant3 = Participant.of("other@mail.com", "Petro Mohyla", "NaUKMA");
-
-        System.out.println("participant1 == participant2: " + (participant1 == participant2));
-        System.out.println("participant1.equals(participant2): " + participant1.equals(participant2));
-        System.out.println("hashCode однакові: " + (participant1.hashCode() == participant2.hashCode()));
-        System.out.println("participant1.equals(participant3): " + participant1.equals(participant3));
-
-        System.out.println("\n=== 6. Виклик обчислюваних методів ===");
-        System.out.println("Тривалість події (eventDays): " + ConferenceUtils.eventDays(event1) + " дн.");
-        System.out.println("Днів до початку реєстрації (daysBeforeEvent): " + ConferenceUtils.daysBeforeEvent(reg1) + " дн.");
-
-        System.out.println("\n=== 7. Вивід усіх сутностей через toString() ===");
-        System.out.println(venue1);
-        System.out.println(participant1);
-        System.out.println(event1);
-        System.out.println(reg1);
-
-        // System.out.println(ua.conference.util.ValidationHelper.class.getName());
-        // Рядок вище не скомпілюється, оскільки ValidationHelper є package-private класом у пакеті ua.conference.util і недоступний ззовні.
+        System.out.println("\n=== 4. Демонстрація логування трьох рівнів ===");
+        log.info("Повідомлення рівня INFO: Операцію завершено успішно.");
+        log.warn("Повідомлення рівня WARN: Зверніть увагу на можливі ризики.");
+        log.error("Повідомлення рівня ERROR: Виникла помилка в системі.");
     }
 }
