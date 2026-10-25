@@ -1,0 +1,7 @@
+venueCode,name,capacity
+HALL-A,Main Conference Hall,500
+HALL-B,Tech Hub Center,150
+BAD1,Invalid Capacity,-50
+BAD2,Missing Name,
+BAD3,Not A Number,abc
+HALL-C,Workshop Room,30
