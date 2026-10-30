@@ -6,63 +6,49 @@ import java.time.LocalDate;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("=== 1. Створення об'єктів конструктором та фабричним методом ===");
-        Venue venue1 = Venue.of("  HALL-A ", " Main Hall ", 500);
-        Participant participant1 = Participant.of(" User1@Mail.COM ", " Ivan Franko ", " LNU ");
-        Event event1 = new Event("CONF-2026", "Java Conference", venue1, " tech ", LocalDate.of(2026, 10, 15), LocalDate.of(2026, 10, 17));
-        EventRegistration reg1 = new EventRegistration(event1, participant1, " vip ", LocalDate.of(2026, 10, 10));
+        System.out.println("=== 1. Створення record-об'єкта та звернення до його компонентів ===");
+        Venue venue1 = Venue.of("HALL-A", "Main Hall", 500);
+        Event event1 = new Event("CONF-2026", "Java Conference", venue1, EventCategory.TECH, LocalDate.of(2026, 10, 15), LocalDate.of(2026, 10, 17));
 
-        System.out.println("=== 2. Демонстрація нормалізації ===");
-        System.out.println("Email (вхід: ' User1@Mail.COM '): " + participant1.getEmail());
-        System.out.println("Category (вхід: ' tech '): " + event1.getCategory());
-        System.out.println("TicketType (вхід: ' vip '): " + reg1.getTicketType());
+        System.out.println("Код події через рекордер (event1.eventCode()): " + event1.eventCode());
+        System.out.println("Категорія (event1.category()): " + event1.category());
 
-        System.out.println("\n=== 3. Порушення правил валідації (try/catch) ===");
-        try {
-            Venue.of("HALL-B", "Small Room", -5);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Помилка 1: " + e.getMessage());
+        System.out.println("\n=== 2. Enum у роботі ===");
+        System.out.println("Перебір усіх значений EventCategory (values()):");
+        for (EventCategory cat : EventCategory.values()) {
+            System.out.println(" - " + cat);
         }
 
-        try {
-            new Event("CONF-ERR", "Invalid Category", venue1, "pizza", LocalDate.now(), LocalDate.now().plusDays(1));
-        } catch (IllegalArgumentException e) {
-            System.out.println("Помилка 2: " + e.getMessage());
-        }
+        System.out.println("Доступ до власного поля TicketType.VIP (priceMultiplier): " + TicketType.VIP.getPriceMultiplier());
 
         try {
-            new EventRegistration(event1, participant1, "STANDARD", LocalDate.of(2026, 10, 20));
+            System.out.println("Парсинг неіснуючого enum значення 'INVALID'...");
+            EventCategory.valueOf("INVALID");
         } catch (IllegalArgumentException e) {
-            System.out.println("Помилка 3: " + e.getMessage());
+            System.out.println("Перехоплено виняток для некоректного enum: " + e.getMessage());
         }
 
-        System.out.println("\n=== 4. Спроба зіпсувати об'єкт сеттером ===");
+        System.out.println("\n=== 3. Обидва switch-вирази ===");
+        System.out.println("Опис категорії (switch №1): " + ConferenceUtils.getCategoryDescription(event1.category()));
+        System.out.println("Ціна квитка VIP при базовій 1000 грн (switch №2): " + ConferenceUtils.calculateTicketPrice(TicketType.VIP, 1000.0) + " грн.");
+
+        System.out.println("\n=== 4. Record із невалідними даними (компактний конструктор) ===");
         try {
-            venue1.setCapacity(0);
+            new Event("CONF-ERR", "Invalid Event", venue1, EventCategory.TECH, LocalDate.of(2026, 10, 20), LocalDate.of(2026, 10, 15));
         } catch (IllegalArgumentException e) {
-            System.out.println("Сеттер відхилив некоректне значення: " + e.getMessage());
+            System.out.println("Отримано очікуваний IllegalArgumentException: " + e.getMessage());
         }
 
-        System.out.println("\n=== 5. Порівняння ==/equals/hashCode для однакових і різних об'єктів ===");
-        Participant participant2 = Participant.of("user1@mail.com", "Ivan Franko (копія)", "Inша Організація");
-        Participant participant3 = Participant.of("other@mail.com", "Petro Mohyla", "NaUKMA");
+        System.out.println("\n=== 5. Порівняння двох однакових record (equals та hashCode) ===");
+        Participant participant1 = Participant.of("user@mail.com", "Ivan Franko", "LNU");
+        EventRegistration reg1 = new EventRegistration(event1, participant1, TicketType.STANDARD, LocalDate.of(2026, 10, 10));
+        EventRegistration reg2 = new EventRegistration(event1, participant1, TicketType.STANDARD, LocalDate.of(2026, 10, 10));
 
-        System.out.println("participant1 == participant2: " + (participant1 == participant2));
-        System.out.println("participant1.equals(participant2): " + participant1.equals(participant2));
-        System.out.println("hashCode однакові: " + (participant1.hashCode() == participant2.hashCode()));
-        System.out.println("participant1.equals(participant3): " + participant1.equals(participant3));
+        System.out.println("reg1.equals(reg2): " + reg1.equals(reg2));
+        System.out.println("reg1.hashCode() == reg2.hashCode(): " + (reg1.hashCode() == reg2.hashCode()));
 
-        System.out.println("\n=== 6. Виклик обчислюваних методів ===");
-        System.out.println("Тривалість події (eventDays): " + ConferenceUtils.eventDays(event1) + " дн.");
-        System.out.println("Днів до початку реєстрації (daysBeforeEvent): " + ConferenceUtils.daysBeforeEvent(reg1) + " дн.");
-
-        System.out.println("\n=== 7. Вивід усіх сутностей через toString() ===");
-        System.out.println(venue1);
-        System.out.println(participant1);
-        System.out.println(event1);
-        System.out.println(reg1);
-
-        // System.out.println(ua.conference.util.ValidationHelper.class.getName());
-        // Рядок вище не скомпілюється, оскільки ValidationHelper є package-private класом у пакеті ua.conference.util і недоступний ззовні.
+        System.out.println("\n=== 6. Вивід record через згенерований toString() ===");
+        System.out.println("Згенерований toString() для Event: " + event1);
+        System.out.println("Згенерований toString() для EventRegistration: " + reg1);
     }
 }
