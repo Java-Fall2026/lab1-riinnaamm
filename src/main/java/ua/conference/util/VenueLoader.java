@@ -35,11 +35,11 @@ public class VenueLoader {
                     Venue venue = parseVenueLine(line, lineNumber);
                     venues.add(venue);
                 } catch (InvalidDataException e) {
-                    log.error("Line {}: Skipped invalid data - {}", lineNumber, e.getMessage());
+                    log.warn("Line {}: Skipped invalid data - {}", lineNumber, e.getMessage());
                 }
             }
 
-            log.info("Loaded {} rooms", venues.size());
+            log.info("Loaded {} venues", venues.size());
 
         } catch (NoSuchFileException e) {
             log.warn("File not found at path: {}. Skipping read operation.", filePath);
