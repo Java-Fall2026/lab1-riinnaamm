@@ -36,13 +36,25 @@ class VenueLoaderTest {
     }
 
     @Test
-    @DisplayName("Should throw InvalidDataException when capacity is not a number")
+    @DisplayName("Should throw InvalidDataException with cause when number format is invalid")
     void testInvalidNumberFormatInCsvLine() {
         String line = "HALL-B, Tech Hub, ABC";
         InvalidDataException exception = assertThrows(InvalidDataException.class, () ->
                 VenueLoader.parseVenueLine(line, 3)
         );
         assertTrue(exception.getMessage().contains("Line 3"));
+        assertNotNull(exception.getCause(), "Cause should not be null for NumberFormatException");
+    }
+
+    @Test
+    @DisplayName("Should throw InvalidDataException with cause when columns are missing")
+    void testMissingColumnsInCsvLine() {
+        String line = "HALL-MISSING, Only Name"; // Missing capacity column -> ArrayIndexOutOfBoundsException
+        InvalidDataException exception = assertThrows(InvalidDataException.class, () ->
+                VenueLoader.parseVenueLine(line, 5)
+        );
+        assertTrue(exception.getMessage().contains("Line 5"));
+        assertNotNull(exception.getCause(), "Cause should not be null for ArrayIndexOutOfBoundsException");
     }
 
     @Test
