@@ -34,7 +34,7 @@ public class GenericRepository<T> {
             throw new IllegalArgumentException("Item cannot be null");
         }
 
-        String identity = identityExtractor.extractIdentity(item);
+        String identity = identityExtractor.identityOf(item);
         if (identity == null || identity.isBlank()) {
             log.error("[{}] Extracted identity is null or blank for item: {}", name, item);
             throw new IllegalArgumentException("Identity cannot be null or blank");
@@ -54,7 +54,7 @@ public class GenericRepository<T> {
             throw new IllegalArgumentException("Item cannot be null");
         }
 
-        String identity = identityExtractor.extractIdentity(item);
+        String identity = identityExtractor.identityOf(item);
         if (identity == null || identity.isBlank()) {
             throw new IllegalArgumentException("Identity cannot be null or blank");
         }
