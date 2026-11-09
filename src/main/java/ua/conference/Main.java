@@ -17,7 +17,7 @@ public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
-        System.out.println("=== 1. GenericRepository for Venue (Mutable Class with Setters) ===");
+        System.out.println(" 1. GenericRepository for Venue (Mutable Class with Setters) ");
         GenericRepository<Venue> venueRepository = new GenericRepository<>("VenueRepo", Venue::getVenueCode);
 
         Venue v1 = Venue.of("HALL-101", "Main Center", 250);
@@ -25,7 +25,7 @@ public class Main {
         venueRepository.add(v1);
         venueRepository.add(v2);
 
-        System.out.println("\n--- Demonstration: add() throws DuplicateIdentityException (ERROR level) ---");
+        System.out.println("\n Demonstration: add() throws DuplicateIdentityException (ERROR level) ");
         try {
             Venue duplicateV1 = Venue.of("HALL-101", "Duplicate Hall", 300);
             venueRepository.add(duplicateV1);
@@ -33,12 +33,12 @@ public class Main {
             log.error("Caught expected exception when adding duplicate via add(): {}", e.getMessage());
         }
 
-        System.out.println("\n--- Demonstration: addIfAbsent() returns false on duplicate ---");
+        System.out.println("\n Demonstration: addIfAbsent() returns false on duplicate ");
         Venue duplicateV2 = Venue.of("HALL-101", "Another Duplicate", 400);
         boolean isAdded = venueRepository.addIfAbsent(duplicateV2);
         System.out.println("addIfAbsent result for existing identity 'HALL-101': " + isAdded);
 
-        System.out.println("\n=== 2. GenericRepository for Event (Record Domain Type) ===");
+        System.out.println("\n 2. GenericRepository for Event (Record Domain Type) ");
         GenericRepository<Event> eventRepository = new GenericRepository<>("EventRepo", Event::eventCode);
 
         Event e1 = new Event("CONF-2026", "Java Tech Summit", v1, EventCategory.TECH,
@@ -52,7 +52,7 @@ public class Main {
         System.out.println("All Events in repository:");
         eventRepository.findAll().forEach(System.out::println);
 
-        System.out.println("\n=== 3. GenericRepository for Participant (3rd Domain Type) ===");
+        System.out.println("\n 3. GenericRepository for Participant (3rd Domain Type) ");
         GenericRepository<Participant> participantRepository = new GenericRepository<>("ParticipantRepo", Participant::getEmail);
 
         Participant p1 = Participant.of("john.doe@example.com", "John Doe", "Tech Corp");
@@ -61,7 +61,7 @@ public class Main {
         participantRepository.add(p1);
         participantRepository.add(p2);
 
-        System.out.println("\n--- Search Found vs Not Found ---");
+        System.out.println("\n Search Found vs Not Found ");
         System.out.print("Searching 'john.doe@example.com': ");
         participantRepository.findByIdentity("john.doe@example.com")
                 .ifPresentOrElse(
@@ -76,12 +76,12 @@ public class Main {
                         () -> System.out.println("NOT FOUND (Expected scenario)")
                 );
 
-        System.out.println("\n--- Removal Demonstration ---");
+        System.out.println("\n Removal Demonstration ");
         boolean removed = participantRepository.removeByIdentity("john.doe@example.com");
         System.out.println("Removed 'john.doe@example.com' status: " + removed);
         System.out.println("Participant repository size after removal: " + participantRepository.size());
 
-        System.out.println("\n=== 4. Loading Venues from CSV into Repository ===");
+        System.out.println("\n 4. Loading Venues from CSV into Repository ");
         List<Venue> csvVenues = VenueLoader.loadVenues("data/venues.csv");
         for (Venue csvVenue : csvVenues) {
             boolean addedFromCsv = venueRepository.addIfAbsent(csvVenue);
