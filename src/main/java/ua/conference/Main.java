@@ -48,13 +48,19 @@ public class Main {
         }
 
         System.out.println("\n 2. Сортування за природним порядком та багаторівневим компаратором ");
-        System.out.println(" Природний порядок (Comparable за venueCode): ");
+        System.out.println(" Природний порядок локацій (Comparable за venueCode): ");
         List<Venue> naturalSorted = new ArrayList<>(venueRepository.findAll());
         Collections.sort(naturalSorted);
         naturalSorted.forEach(System.out::println);
 
-        System.out.println("\n Багаторівневе сортування (місткість DESC, далі назва ASC): ");
+        System.out.println("\n Багаторівневе сортування локацій (місткість DESC, далі назва ASC): ");
         venueRepository.findAllSortedByCapacityDescThenName().forEach(System.out::println);
+
+        System.out.println("\n Сортування подій за датою початку (findAllSortedByStartDate): ");
+        eventRepository.findAllSortedByStartDate().forEach(System.out::println);
+
+        System.out.println("\n Багаторівневе сортування подій (категорія ASC, дата DESC): ");
+        eventRepository.findAllSortedByCategoryThenDateDesc().forEach(System.out::println);
 
         System.out.println("\n 3. Сортування за ключем identity (SortOrder.ASC та SortOrder.DESC) ");
         System.out.println(" Сортування за ключем ASC: ");
@@ -68,7 +74,7 @@ public class Main {
         Set<Venue> treeSet = new TreeSet<>(capacityComparator);
 
         Venue vA = Venue.of("CODE1", "Hall A", 200);
-        Venue vB = Venue.of("CODE2", "Hall B", 200); // Одинакова місткість, але різні коди
+        Venue vB = Venue.of("CODE2", "Hall B", 200);
 
         treeSet.add(vA);
         treeSet.add(vB);
@@ -77,15 +83,30 @@ public class Main {
         System.out.println("Кількість елементів у TreeSet: " + treeSet.size());
         System.out.println("Елементи в TreeSet: " + treeSet);
 
-        System.out.println("\n 5. Пошук через Stream API ");
-        System.out.println(" Пошук за частковим збігом назви ('Tech'): ");
+        System.out.println("\n 5. Пошук через Stream API (VenueRepository та EventRepository) ");
+        System.out.println(" Пошук локацій за частковим збігом назви ('Tech'): ");
         venueRepository.findByNameContaining("Tech").forEach(System.out::println);
 
-        System.out.println("\n Пошук за діапазоном місткості [100, 260]: ");
+        System.out.println("\n Пошук локацій за діапазоном місткості [100, 260]: ");
         venueRepository.findByCapacityRange(100, 260).forEach(System.out::println);
 
-        System.out.println("\n Пошук за двома умовами : ");
+        System.out.println("\n Пошук локацій за двома умовами (cap >= 200 та 'Main'): ");
         venueRepository.findLargeVenuesWithName(200, "Main").forEach(System.out::println);
+
+        System.out.println("\n Пошук подій за частковим збігом назви ('Summit'): ");
+        eventRepository.findByTitleContaining("Summit").forEach(System.out::println);
+
+        System.out.println("\n Пошук подій за діапазоном дат [today .. today + 6 днів]: ");
+        eventRepository.findByDateRange(today, today.plusDays(6)).forEach(System.out::println);
+
+        System.out.println("\n Пошук подій за двома умовами (TECH + діапазон дат): ");
+        eventRepository.findByCategoryAndDateRange(EventCategory.TECH, today, today.plusDays(6)).forEach(System.out::println);
+
+        System.out.println("\n Унікальні локації подій (map + distinct): ");
+        eventRepository.findDistinctVenuesUsed().forEach(System.out::println);
+
+        System.out.println("\n Топ-2 найближчі події (sorted + map + limit): ");
+        System.out.println(eventRepository.findUpcomingEventTitles(2));
 
         System.out.println("\n 6. Обробка відсутнього результату Optional ");
         System.out.print("Пошук локації з місткістю >= 500: ");
@@ -103,6 +124,9 @@ public class Main {
         System.out.println(" Групування подій за категоріями (Collectors.groupingBy): ");
         Map<EventCategory, List<Event>> grouped = eventRepository.groupByCategory();
         grouped.forEach((category, events) -> System.out.println(category + " -> " + events));
+
+        System.out.println("\n Підрахунок кількості подій за категоріями (countByCategory): ");
+        System.out.println(eventRepository.countByCategory());
 
         System.out.println("\n Середня місткість локацій (Агрегація): ");
         System.out.println("Середня місткість: " + venueRepository.getAverageCapacity());
@@ -123,7 +147,7 @@ public class Main {
         System.out.println("\n 9. Додаткова перевірка ЛР4 (Participant та CSV Loader) ");
         GenericRepository<Participant> participantRepository = new GenericRepository<>("ParticipantRepo", Participant::getEmail);
         participantRepository.add(Participant.of("john.doe@example.com", "John Doe", "Tech Corp"));
-        System.out.println("Participant repository size: " + participantRepository.size());
+        System.out.println("Participant  repository size: " + participantRepository.size());
 
         List<Venue> csvVenues = VenueLoader.loadVenues("data/venues.csv");
         for (Venue csvVenue : csvVenues) {

@@ -1,7 +1,10 @@
 package ua.conference.model;
 
 import ua.conference.util.ConferenceUtils;
+
 import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.Objects;
 
 public record Event(
         String eventCode,
@@ -11,6 +14,9 @@ public record Event(
         LocalDate startDate,
         LocalDate endDate
 ) implements Comparable<Event> {
+
+    private static final Comparator<Event> NATURAL_ORDER_COMPARATOR =
+            Comparator.comparing(Event::eventCode);
 
     public Event {
         ConferenceUtils.validateNonNullOrEmpty(eventCode, "EventCode");
@@ -31,16 +37,18 @@ public record Event(
         if (other == null) {
             return 1;
         }
-        int codeComparison = this.eventCode.compareTo(other.eventCode);
-        if (codeComparison != 0) {
-            return codeComparison;
-        }
+        return NATURAL_ORDER_COMPARATOR.compare(this, other);
+    }
 
-        int dateComparison = this.startDate.compareTo(other.startDate);
-        if (dateComparison != 0) {
-            return dateComparison;
-        }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Event event)) return false;
+        return Objects.equals(eventCode, event.eventCode);
+    }
 
-        return this.title.compareTo(other.title);
+    @Override
+    public int hashCode() {
+        return Objects.hash(eventCode);
     }
 }
