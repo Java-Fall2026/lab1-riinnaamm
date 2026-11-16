@@ -3,7 +3,7 @@ package ua.conference.model;
 import ua.conference.util.ConferenceUtils;
 import java.util.Objects;
 
-public class Venue {
+public class Venue implements Comparable<Venue> {
     private String venueCode;
     private String name;
     private int capacity;
@@ -34,6 +34,18 @@ public class Venue {
     public void setCapacity(int capacity) {
         ConferenceUtils.validatePositive(capacity, "Capacity");
         this.capacity = capacity;
+    }
+
+    @Override
+    public int compareTo(Venue other) {
+        if (other == null) {
+            return 1;
+        }
+        int codeComparison = this.venueCode.compareTo(other.venueCode);
+        if (codeComparison != 0) {
+            return codeComparison;
+        }
+        return this.name.compareTo(other.name);
     }
 
     @Override

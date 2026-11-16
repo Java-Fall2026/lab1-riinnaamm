@@ -5,6 +5,10 @@ import org.slf4j.LoggerFactory;
 import ua.conference.exception.DuplicateIdentityException;
 
 import java.util.*;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class GenericRepository<T> {
     private static final Logger log = LoggerFactory.getLogger(GenericRepository.class);
@@ -105,5 +109,39 @@ public class GenericRepository<T> {
 
     public int size() {
         return items.size();
+    }
+
+    public List<T> findAllSorted(Comparator<T> comparator) {
+        if (comparator == null) {
+            throw new IllegalArgumentException("Comparator cannot be null");
+        }
+        List<T> sortedList = items.values().stream()
+                .sorted(comparator)
+                .toList();
+        log.info("[{}] Executed findAllSorted with comparator. Returned {} items.", name, sortedList.size());
+        return sortedList;
+    }
+
+    public List<T> findAllSortedByIdentity(SortOrder order) {
+        if (order == null) {
+            throw new IllegalArgumentException("Sort order cannot be null");
+        }
+
+        var entryComparator = Map.Entry.<String, T>comparingByKey();
+        if (order == SortOrder.DESC) {
+            entryComparator = entryComparator.reversed();
+        }
+
+        List<T> sortedList = items.entrySet().stream()
+                .sorted(entryComparator)
+                .map(Map.Entry::getValue)
+                .toList();
+
+        log.info("[{}] Executed findAllSortedByIdentity ({}). Returned {} items.", name, order, sortedList.size());
+        return sortedList;
+    }
+
+    public Stream<T> stream() {
+        return items.values().stream();
     }
 }
